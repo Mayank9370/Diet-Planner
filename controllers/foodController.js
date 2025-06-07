@@ -1,10 +1,15 @@
-const Food = require('../models/Food');
+const supabase = require('../config/supabaseClient')
 
 exports.addFood = async (req, res) => {
   try {
-    const food = new Food(req.body);
-    await food.save();
-    res.status(201).json(food);
+    const { data, error } = await supabase
+      .from('foods')
+      .insert(req.body)
+      .select();
+
+    if (error) throw error;
+    res.status(201).json(data[0]);
+
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -12,18 +17,13 @@ exports.addFood = async (req, res) => {
 
 exports.getFoods = async (req, res) => {
   try {
-    const query = req.query.search || '';
-    const foods = await Food.find({ name: { $regex: query, $options: 'i' } });
-    res.json(foods);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+    const { data, error } = await supabase
+      .from('foods')
+      .select('*');
 
-exports.deleteFood = async (req, res) => {
-  try {
-    await Food.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Food deleted' });
+    if (error) throw error;
+    res.json(data);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

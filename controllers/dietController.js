@@ -1,31 +1,31 @@
-const Food = require('../models/Food');
+const supabase = require('../config/supabaseClient')
 
 exports.generateDietPlan = async (req, res) => {
   try {
     const goal = (req.query.goal || '').toLowerCase();
 
     if (!['weight loss', 'maintenance', 'muscle gain'].includes(goal)) {
-      return res.status(400).json({ error: 'Invalid goal. Use: weight loss, maintenance, muscle gain.' });
+      return res.status(400).json({ error: 'Invalid goal' });
     }
 
-    const allFoods = await Food.find();
-
-    let selectedFoods = [];
+    let query = supabase.from('foods').select('*');
 
     switch (goal) {
       case 'weight loss':
-        selectedFoods = allFoods.filter(food => food.calories <= 200 && food.fat <= 10);
+        query = query.lte('calories', 200).lte('fat', 10);
         break;
       case 'maintenance':
-        selectedFoods = allFoods.filter(food => food.calories <= 400);
+        query = query.lte('calories', 400);
         break;
       case 'muscle gain':
-        selectedFoods = allFoods.filter(food => food.protein >= 10);
+        query = query.gte('protein', 10);
         break;
     }
 
-    const plan = selectedFoods.slice(0, 5); // Top 5 foods for the goal
-    res.json({ goal, plan });
+    const { data: foods, error } = await query.limit(5);
+
+    if (error) throw error;
+    res.json({ goal, plan: foods });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
