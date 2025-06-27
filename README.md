@@ -1,5 +1,5 @@
-
-•	Add food
-•	Search food
-•	Delete food
-•	Generate diet plan based on given goal (weight loss, maintenance, muscle gain)
+•	User onboarding with goal-based nutrition calculations.
+•	Daily food and activity logging.
+•	Tracking remaining daily nutrition goals.
+•	Setting daily reminders (like water/sleep/exercise).
+•	Cron-based automation (e.g., daily food log reset, reminder checks).
