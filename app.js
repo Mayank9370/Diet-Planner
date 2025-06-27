@@ -1,18 +1,26 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const app = express();
 
-const cors = require('cors');
+const userRoutes = require('./routes/userRoutes');
+const foodLogRoutes = require('./routes/foodLogRoutes');
+const reminderRoutes = require('./routes/reminderRoutes');
+const checkReminders = require('./cron/reminderCron');
 
-app.use(cors({
-  origin: 'http://localhost:5173'
-}));
 
+app.use(cors({ origin: 'http://localhost:5173' }));
+
+//Routes
 app.use(express.json());
+app.use('/api/user', userRoutes);
+app.use('/api/food-log', foodLogRoutes);
+app.use('/reminders', reminderRoutes);
 
-// Routes
-app.use('/api/food', require('./routes/food'));
-app.use('/api/diet', require('./routes/diet'));
+
+require("./cron/dailyReset");
+// Run cron job every minute
+setInterval(checkReminders, 60 * 1000); //callback is a function
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
